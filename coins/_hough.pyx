@@ -48,23 +48,23 @@ def hough_circles(cnp.ndarray[ndim=2, dtype=cnp.double_t] values,
     # assume values array is sparse.  compute the nonzero indexes
     cdef cnp.ndarray[ndim=1, dtype=cnp.intp_t] xs, ys
     xs, ys = np.nonzero(values)
-    
+
     cdef cnp.ndarray[ndim=2, dtype=cnp.double_t] acc = np.zeros((xmax, ymax))
 
     cdef Py_ssize_t x, y, cx, cy, p
     cdef double dx, dy, magnitude
-    
+
     # For each non zero pixel
     for p in range(xs.size):
         x, y = xs[p], ys[p]
-        
+
         dx, dy = normals[x, y]
         if not normalised:
             magnitude = sqrt(dx**2 + dy**2)
             if magnitude != 0:
                 dx /= magnitude
                 dy /= magnitude
-       
+
         offset_x = llround(dx * radius)
         offset_y = llround(dy * radius)
 
@@ -73,7 +73,7 @@ def hough_circles(cnp.ndarray[ndim=2, dtype=cnp.double_t] values,
 
         if 0 <= cx < xmax and 0 <= cy < ymax:
             acc[cx, cy] += values[x, y]
-    
+
         if flip:
             cx = x + offset_x
             cy = y + offset_y
