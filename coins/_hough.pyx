@@ -8,9 +8,6 @@ from libc.math cimport sqrt, llround
 from scipy.ndimage.filters import sobel
 from scipy.ndimage import gaussian_filter
 
-#cdef inline Py_ssize_t round(double r):
-#    return <Py_ssize_t>((r + 0.5) if (r > 0.0) else (r - 0.5))
-
 
 def hough_circles(cnp.ndarray[ndim=2, dtype=cnp.double_t] values,
                   cnp.ndarray[ndim=3, dtype=cnp.double_t] normals,
