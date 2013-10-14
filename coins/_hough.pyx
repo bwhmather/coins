@@ -50,9 +50,9 @@ def hough_circles(cnp.ndarray[ndim=2, dtype=cnp.double_t] values,
 
     # assume values array is sparse.  compute the nonzero indexes
     cdef cnp.ndarray[ndim=1, dtype=cnp.intp_t] xs, ys
-    xs, ys = cnp.nonzero(values)
+    xs, ys = np.nonzero(values)
     
-    cdef cnp.ndarray[ndim=2, dtype=cnp.double_t] acc = cnp.zeros((xmax, ymax))
+    cdef cnp.ndarray[ndim=2, dtype=cnp.double_t] acc = np.zeros((xmax, ymax))
 
     cdef Py_ssize_t x, y, cx, cy, p
     cdef double dx, dy, magnitude
