@@ -85,10 +85,37 @@ def detect_possible_circles(image):
     return x_coords, y_coords, radii, weights
 
 
-def prune_overlapping(circles):
-    pass
+def choose_scale(radii, weights=None, window_size=2):
+    """
+    """
+    for radius, weight in zip(radius, weights):
+        histogram.add(weight * (radius ** 2))
 
+    cumulative_sum(historam)
+    window_score = cumsum[:x] - cumsum[x:]
+    argmax(window_score)
+
+    return min_radius, max_radius
+
+
+def prune_overlapping(candidate_circles):
+
+    # sort circles by weight
+
+    for candidate_circle in candidate_circles:
+        overlapping = False
+
+        for circle in circles:
+            if distance_squared(circle, candidate_circle) < max(circle.radius**2, candidate_circle.radius**2):
+                overlapping = True
+                continue
+
+        if not overlapping:
+            circles.append(candidate_circle)
+
+
+def get_thumbnail_for_circle(image, x, y, radius, size=64):
+    pass
 
 if __name__ == '__main__':
     pass
-
