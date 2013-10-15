@@ -10,38 +10,32 @@ from skimage import img_as_float
 from coins._hough import hough_circles
 
 
-def detect_circles_at_scale(image, radius, low_threshold, high_threshold, sigma):
+def compute_center_pdf(image, radius,
+                       low_threshold, high_threshold,
+                       gradient_sigma=0, confidence_sigma=0):
+    """ Creates a map representing the probability that each point on an image
+    is the center of a circle.
+    """
     # detect edges
     edges = filter.canny(image, 0, low_threshold, high_threshold)
 
     # cdef cnp.ndarray[ndim=2, dtype=cnp.double_t] dxs, dys
-    smoothed = gaussian_filter(image, sigma)
-    normals = np.transpose(np.array([sobel(smoothed, 0), sobel(smoothed, 1)]), (1, 2, 0))
+    smoothed = gaussian_filter(image, gradient_sigma)
+    normals = np.transpose(np.array([sobel(smoothed, 0),
+                                     sobel(smoothed, 1)]), (1, 2, 0))
 
     # compute circle probability map
     center_pdf = hough_circles(img_as_float(edges), normals, radius, flip=True)
 
-    # find possible circle centers
-    # current method is to blur the pdf to remove outliers then just pick local
-    # peaks.  A more elegant method would be nice (mixture of gaussians?)
-    center_pdf_smoothed = gaussian_filter(center_pdf, 3)
+    # blur to account for lack of confidence in tangents
+    # ideally this should be part of the hough transform and it should be
+    # possible to specify seperate angular and radial confidence seperately
+    center_pdf_smoothed = gaussian_filter(center_pdf, confidence_sigma)
 
-    # for some reason `peak_local_max` with `indices=True` returns an array of
-    # vectors with the x and y axis swapped.  `np.nonzero` is a workaround.
-    x_coords, y_coords = np.nonzero(
-        feature.peak_local_max(center_pdf_smoothed, indices=False)
-    )
-
-    weights = center_pdf_smoothed[x_coords, y_coords]
-
-    return  (
-        np.array(x_coords, dtype=np.float32),
-        np.array(y_coords, dtype=np.float32),
-        center_pdf_smoothed[x_coords, y_coords]
-    )
+    return center_pdf_smoothed
 
 
-def detect_circles(image):
+def detect_possible_circles(image):
     """
     """
     image = img_as_float(image)
@@ -55,15 +49,28 @@ def detect_circles(image):
     for scaled_image in scaled_images:
         scale = scaled_image.shape[0] / image.shape[0]
 
-        if scaled_image.size < 20*20:
+        # don't bother searching for coins larger than the image
+        if scaled_image.size < (2*radius)**2:
             break
 
-        s_x_coords, s_y_coords, s_weights = \
-            detect_circles_at_scale(scaled_image, 20, 0.2, 0.3, 0)
+        center_pdf = compute_center_pdf(scaled_image, radius, 0.2, 0.3, 0, 3)
 
-        s_x_coords /= scale
-        s_y_coords /= scale
-        s_radii = np.repeat(20/scale, s_weights.size)
+        # TODO better way of detecting peeks (gmm or something
+        # For some reason `peak_local_max` with `indices=True` returns an
+        # array of vectors with the x and y axis swapped.
+        # using `np.nonzero` and `indices=False` is a workaround.
+        s_x_coords, s_y_coords = np.nonzero(
+            feature.peak_local_max(center_pdf_smoothed, indices=False)
+        )
+        s_weights = center_pdf[s_x_coords, s_y_coords]
+
+        # Convert from scaled image to image coordinates
+        # At some point it would be nice to detect peaks with subpixel accuracy
+        # so also convert to floating point
+        s_x_coords = np.as_float(s_x_coords) / scale
+        s_y_coords = np.as_float(s_y_coords) / scale
+
+        s_radii = np.repeat(radius/scale, s_weights.size)
 
         x_coords.append(s_x_coords)
         y_coords.append(s_y_coords)
