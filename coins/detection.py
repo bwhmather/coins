@@ -116,3 +116,15 @@ def prune_overlapping(candidate_circles):
 
 def get_thumbnail_for_circle(image, x, y, radius, size=64):
     pass
+
+
+def detect_coins(image):
+    detect_possible_circles()
+
+    choose_scale()
+    prune_small_circles()
+    prune_large_circles()
+
+    prune_colourful()
+
+    prune_overlapping()
