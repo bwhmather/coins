@@ -38,6 +38,8 @@ def compute_center_pdf(image, radius,
 def detect_possible_circles(image):
     """
     """
+    radius = 20 # TODO magic
+
     image = img_as_float(image)
 
     x_coords = []
@@ -60,15 +62,15 @@ def detect_possible_circles(image):
         # array of vectors with the x and y axis swapped.
         # using `np.nonzero` and `indices=False` is a workaround.
         s_x_coords, s_y_coords = np.nonzero(
-            feature.peak_local_max(center_pdf_smoothed, indices=False)
+            feature.peak_local_max(center_pdf, indices=False)
         )
         s_weights = center_pdf[s_x_coords, s_y_coords]
 
         # Convert from scaled image to image coordinates
         # At some point it would be nice to detect peaks with subpixel accuracy
         # so also convert to floating point
-        s_x_coords = np.as_float(s_x_coords) / scale
-        s_y_coords = np.as_float(s_y_coords) / scale
+        s_x_coords = s_x_coords.astype(np.float64) / scale
+        s_y_coords = s_y_coords.astype(np.float64) / scale
 
         s_radii = np.repeat(radius/scale, s_weights.size)
 
@@ -85,46 +87,46 @@ def detect_possible_circles(image):
     return x_coords, y_coords, radii, weights
 
 
-def choose_scale(radii, weights=None, window_size=2):
-    """
-    """
-    for radius, weight in zip(radius, weights):
-        histogram.add(weight * (radius ** 2))
-
-    cumulative_sum(historam)
-    window_score = cumsum[:x] - cumsum[x:]
-    argmax(window_score)
-
-    return min_radius, max_radius
-
-
-def prune_overlapping(candidate_circles):
-
-    # sort circles by weight
-
-    for candidate_circle in candidate_circles:
-        overlapping = False
-
-        for circle in circles:
-            if distance_squared(circle, candidate_circle) < max(circle.radius**2, candidate_circle.radius**2):
-                overlapping = True
-                continue
-
-        if not overlapping:
-            circles.append(candidate_circle)
-
-
-def get_thumbnail_for_circle(image, x, y, radius, size=64):
-    pass
-
-
-def detect_coins(image):
-    detect_possible_circles()
-
-    choose_scale()
-    prune_small_circles()
-    prune_large_circles()
-
-    prune_colourful()
-
-    prune_overlapping()
+#def choose_scale(radii, weights=None, window_size=2):
+#    """
+#    """
+#    for radius, weight in zip(radius, weights):
+#        histogram.add(weight * (radius ** 2))
+#
+#    cumulative_sum(historam)
+#    window_score = cumsum[:x] - cumsum[x:]
+#    argmax(window_score)
+#
+#    return min_radius, max_radius
+#
+#
+#def prune_overlapping(candidate_circles):
+#
+#    # sort circles by weight
+#
+#    for candidate_circle in candidate_circles:
+#        overlapping = False
+#
+#        for circle in circles:
+#            if distance_squared(circle, candidate_circle) < max(circle.radius**2, candidate_circle.radius**2):
+#                overlapping = True
+#                continue
+#
+#        if not overlapping:
+#            circles.append(candidate_circle)
+#
+#
+#def get_thumbnail_for_circle(image, x, y, radius, size=64):
+#    pass
+#
+#
+#def detect_coins(image):
+#    detect_possible_circles()
+#
+#    choose_scale()
+#    prune_small_circles()
+#    prune_large_circles()
+#
+#    prune_colourful()
+#
+#    prune_overlapping()
