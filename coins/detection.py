@@ -37,6 +37,7 @@ def detect_possible_circles(image):
     """
     """
     radius = 20 # TODO magic
+    step = 1.1
 
     image = img_as_float(image)
 
@@ -45,7 +46,7 @@ def detect_possible_circles(image):
     radii = []
     weights = []
 
-    scaled_images = transform.pyramid_gaussian(image, downscale=1.1)
+    scaled_images = transform.pyramid_gaussian(image, downscale=step)
     for scaled_image in scaled_images:
         scale = scaled_image.shape[0] / image.shape[0]
 
