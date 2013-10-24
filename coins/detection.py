@@ -27,7 +27,8 @@ def compute_center_pdf(image, radius,
 
     # blur to account for lack of confidence in tangents
     # ideally this should be part of the hough transform and it should be
-    # possible to specify seperate angular and radial confidence seperately
+    # possible to specify angular and radial confidence seperately but doing so
+    # is crazy slow
     center_pdf_smoothed = gaussian_filter(center_pdf, confidence_sigma)
 
     return center_pdf_smoothed
@@ -36,7 +37,7 @@ def compute_center_pdf(image, radius,
 def detect_possible_circles(image):
     """
     """
-    radius = 20 # TODO magic
+    radius = 20  # TODO magic
     step = 1.1
 
     image = img_as_float(image)
