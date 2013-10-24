@@ -87,3 +87,25 @@ def detect_possible_circles(image):
     return x_coords, y_coords, radii, weights
 
 
+def prune_overlapping(x_coords, y_coords, radii, weights, threshold=1):
+    """ Remove coins overlapping other coins with higher weights
+    """
+    sorted_indices = weights.argsort()[::-1]
+
+    selected_indices = []
+
+    for i in sorted_indices:
+        xi, yi, ri, wi = x_coords[i], y_coords[i], radii[i], weights[i]
+
+        overlapping = False
+        for s in selected_indices:
+            xs, ys, rs = x_coords[s], y_coords[s], radii[s]
+
+            if (xs - xi)**2 + (ys - yi)**2 < (threshold * max(ri, rs))**2:
+                overlapping = True
+                break
+
+        if not overlapping:
+            selected_indices.append(i)
+
+    return np.array(selected_indices, dtype=np.int64)
