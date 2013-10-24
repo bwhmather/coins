@@ -1,10 +1,8 @@
 import numpy as np
-from numpy.core import records
 
-import scipy as sp
 from scipy.ndimage.filters import sobel, gaussian_filter
 
-from skimage import filter, transform, color, feature
+from skimage import filter, transform, feature
 from skimage import img_as_float
 
 from coins._hough import hough_circles
